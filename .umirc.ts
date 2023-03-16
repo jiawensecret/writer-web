@@ -8,10 +8,18 @@ export default defineConfig({
     style: 'less',
     theme: {},
   },
+  proxy: {
+    '/api': {
+      target: 'http://10.103.0.109:8000/',
+      changeOrigin: true,
+    },
+  },
   access: {},
   model: {},
   initialState: {},
-  request: {},
+  request: {
+    dataField: 'data',
+  },
   layout: {
     title: '@umijs/max',
   },
