@@ -5,3 +5,9 @@ export async function getCurrentUser() {
     method: 'GET',
   });
 }
+
+export async function getMenus() {
+  return request<Common.MenuApi>('/api/me/menus', {
+    method: 'GET',
+  });
+}

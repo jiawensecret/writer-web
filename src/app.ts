@@ -2,6 +2,7 @@
 import { RuntimeAntdConfig, RequestConfig } from 'umi';
 import { theme } from 'antd';
 import services from '@/services/global';
+import { RunTimeLayoutConfig } from '@@/plugin-layout/types';
 
 export const antd: RuntimeAntdConfig = (memo) => {
   memo.theme ||= {};
@@ -57,14 +58,62 @@ export async function getInitialState(): Promise<Common.Me> {
     });
     res.data.permission = k;
   }
-  console.log(res.data);
   return res.data;
 }
 
-export const layout = () => {
+export const layout: RunTimeLayoutConfig = () => {
   return {
     menu: {
-      locale: false,
+      request: async () => {
+        const menuData = await services.GlobalController.getMenus();
+        return menuData.data;
+      },
     },
   };
 };
+
+// export const layout = () => {
+//   return {
+//     menu: {
+//       locale: false,
+//     },
+//     menuDataRender: () => {
+//       return [
+//         {
+//           name: '首页',
+//           path: '/home',
+//           component: './Home',
+//         },
+//         {
+//           name: '权限演示',
+//           path: '/access',
+//           component: './Access',
+//         },
+//         {
+//           name: '通用管理',
+//           path: '/test',
+//           component: '',
+//           routes : [
+//             {
+//               name: ' CRUD 示例',
+//               path: '/table',
+//               component: './Table',
+//             }
+//           ]
+//         },
+//         {
+//           name: '通用管理',
+//           path: '/test',
+//           component: '',
+//           routes : [
+//             {
+//               name: ' CRUD 示例',
+//               path: '/table',
+//               component: './Table',
+//             }
+//           ]
+//         },
+//       ];
+//     }
+//   };
+// };

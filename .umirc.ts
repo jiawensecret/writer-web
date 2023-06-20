@@ -10,7 +10,7 @@ export default defineConfig({
   },
   proxy: {
     '/api': {
-      target: 'http://10.103.0.109:8000/',
+      target: 'http://192.168.31.164:8002/',
       changeOrigin: true,
     },
   },
@@ -23,26 +23,5 @@ export default defineConfig({
   layout: {
     title: '@umijs/max',
   },
-  routes: [
-    {
-      path: '/',
-      redirect: '/home',
-    },
-    {
-      name: '首页',
-      path: '/home',
-      component: './Home',
-    },
-    {
-      name: '权限演示',
-      path: '/access',
-      component: './Access',
-    },
-    {
-      name: ' CRUD 示例',
-      path: '/table',
-      component: './Table',
-    },
-  ],
   npmClient: 'yarn',
 });
