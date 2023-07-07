@@ -13,7 +13,7 @@ import CreateForm from './components/CreateForm';
 import UpdateForm, { FormValueType } from './components/UpdateForm';
 
 const { addUser, queryUserList, deleteUser, modifyUser } =
-  services.UserController;
+  services.UserController1;
 
 /**
  * 添加节点

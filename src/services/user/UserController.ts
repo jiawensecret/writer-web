@@ -8,9 +8,27 @@ export async function queryUserList(params: {
   page?: number;
   page_size?: number;
 }) {
-  return request<User.UserList>('/api/users', {
+  return request<User.UserListApi>('/api/users', {
     method: 'GET',
     params: {
+      ...params,
+    },
+  });
+}
+
+export async function addUser(params: User.UserInfo) {
+  return request<Common.Result>('/api/user', {
+    method: 'POST',
+    data: {
+      ...params,
+    },
+  });
+}
+
+export async function updateUser(params: User.UserInfo) {
+  return request<Common.Result>(`/api/user/${params.id}`, {
+    method: 'PUT',
+    data: {
       ...params,
     },
   });

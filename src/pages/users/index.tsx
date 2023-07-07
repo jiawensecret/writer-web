@@ -1,11 +1,12 @@
-import { PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable, PageContainer } from '@ant-design/pro-components';
-import { Button, Divider, message } from 'antd';
+import { Button, message } from 'antd';
 import React, { useRef, useState } from 'react';
 import services from '@/services/user';
-import UpdateForm, { FormValueType } from '@/pages/users/components/UpdateForm';
+import { Access, useAccess } from '@umijs/max';
+import UpdateForm from '@/pages/users/components/UpdateForm';
 import CreateForm from '@/pages/users/components/CreateForm';
+import { updateUser, addUser } from '@/services/user/UserController';
 
 const { queryUserList } = services.UserController;
 
@@ -27,19 +28,10 @@ const handleAdd = async (fields: User.UserInfo) => {
  * 更新节点
  * @param fields
  */
-const handleUpdate = async (fields: FormValueType) => {
+const handleUpdate = async (fields: User.UserInfo) => {
   const hide = message.loading('正在配置');
   try {
-    await modifyUser(
-      {
-        userId: fields.id || '',
-      },
-      {
-        name: fields.name || '',
-        nickName: fields.nickName || '',
-        email: fields.email || '',
-      },
-    );
+    await updateUser({ ...fields });
     hide();
 
     message.success('配置成功');
@@ -53,10 +45,12 @@ const handleUpdate = async (fields: FormValueType) => {
 
 export default () => {
   const actionRef = useRef<ActionType>();
+
   const [createModalVisible, handleModalVisible] = useState<boolean>(false);
   const [updateModalVisible, handleUpdateModalVisible] =
     useState<boolean>(false);
   const [updateFormValues, setUpdateFormValues] = useState({});
+  const access = useAccess();
   const columns: ProColumns<User.UserInfo>[] = [
     {
       title: 'id',
@@ -125,16 +119,17 @@ export default () => {
       key: 'option',
       render: (_, record) => (
         <>
-          <a
-            onClick={() => {
-              handleUpdateModalVisible(true);
-              setUpdateFormValues(record);
-            }}
-          >
-            编辑
-          </a>
-          <Divider type="vertical" />
-          <a href="">订阅警报</a>
+          <Access accessible={access.UserUpdate}>
+            <a
+              onClick={() => {
+                setUpdateFormValues(record);
+                handleUpdateModalVisible(true);
+                console.log(record);
+              }}
+            >
+              编辑
+            </a>
+          </Access>
         </>
       ),
     },
@@ -143,7 +138,7 @@ export default () => {
   return (
     <PageContainer
       header={{
-        title: 'CRUD 示例',
+        title: '用户管理',
       }}
     >
       <ProTable<User.UserInfo>
@@ -153,7 +148,6 @@ export default () => {
         request={async (params = {}, sort, filter) => {
           const { data } = await queryUserList({
             ...params,
-            // FIXME: remove @ts-ignore
             // @ts-ignore
             filter,
           });
@@ -180,16 +174,18 @@ export default () => {
         dateFormatter="string"
         headerTitle="用户列表"
         toolBarRender={() => [
-          <Button
-            key="button"
-            icon={<PlusOutlined />}
-            onClick={() => {
-              handleModalVisible(true);
-            }}
-            type="primary"
-          >
-            新建
-          </Button>,
+          // eslint-disable-next-line react/jsx-key
+          <Access accessible={access.UserAdd}>
+            <Button
+              key="button"
+              onClick={() => {
+                handleModalVisible(true);
+              }}
+              type="primary"
+            >
+              新建
+            </Button>
+          </Access>,
         ]}
       />
       <CreateForm

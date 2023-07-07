@@ -1,4 +1,8 @@
 declare namespace Common {
+  interface Result {
+    data?: any;
+    msg: string;
+  }
   interface MeApi {
     data: Me;
     msg: string;
@@ -34,17 +38,5 @@ declare namespace Common {
     name?: string;
     code?: string;
     description?: string;
-  }
-
-  interface PageInfo {
-    data: PageInfoItem;
-    msg: string;
-  }
-
-  interface PageInfoItem {
-    page?: number;
-    pageSize?: number;
-    total?: number;
-    list?: Array<Record<string, any>>;
   }
 }
