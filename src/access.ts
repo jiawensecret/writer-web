@@ -101,6 +101,31 @@ export default (initialState: Common.Me) => {
     initialState.permission &&
     initialState.permission.includes('permission:delete')
   );
+  const PermissionAddRoute = !!(
+    initialState &&
+    initialState.permission &&
+    initialState.permission.includes('permission:add-route')
+  );
+  const RouteList = !!(
+    initialState &&
+    initialState.permission &&
+    initialState.permission.includes('route:list')
+  );
+  const RouteAdd = !!(
+    initialState &&
+    initialState.permission &&
+    initialState.permission.includes('route:add')
+  );
+  const RouteUpdate = !!(
+    initialState &&
+    initialState.permission &&
+    initialState.permission.includes('route:update')
+  );
+  const RouteDelete = !!(
+    initialState &&
+    initialState.permission &&
+    initialState.permission.includes('route:delete')
+  );
 
   return {
     UserList,
@@ -123,5 +148,11 @@ export default (initialState: Common.Me) => {
     PermissionAdd,
     PermissionUpdate,
     PermissionDelete,
+    RouteList,
+    RouteAdd,
+    RouteUpdate,
+    RouteDelete,
+    //权限绑定路由
+    PermissionAddRoute,
   };
 };

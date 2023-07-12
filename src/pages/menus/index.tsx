@@ -2,18 +2,19 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable, PageContainer } from '@ant-design/pro-components';
 import { Button, message } from 'antd';
 import React, { useRef, useState } from 'react';
-import services from '@/services/user';
 import { Access, useAccess } from '@umijs/max';
-import UpdateForm from '@/pages/users/components/UpdateForm';
-import CreateForm from '@/pages/users/components/CreateForm';
-import { updateUser, addUser } from '@/services/user/UserController';
+import UpdateForm from '@/pages/menus/components/UpdateForm';
+import CreateForm from '@/pages/menus/components/CreateForm';
+import {
+  updateMenu,
+  addMenu,
+  queryMenuList,
+} from '@/services/menu/MenuController';
 
-const { queryUserList } = services.UserController;
-
-const handleAdd = async (fields: User.UserInfo) => {
+const handleAdd = async (fields: Menu.MenuInfo) => {
   const hide = message.loading('正在添加');
   try {
-    await addUser({ ...fields });
+    await addMenu({ ...fields });
     hide();
     message.success('添加成功');
     return true;
@@ -28,10 +29,10 @@ const handleAdd = async (fields: User.UserInfo) => {
  * 更新节点
  * @param fields
  */
-const handleUpdate = async (fields: User.UserInfo) => {
+const handleUpdate = async (fields: Menu.MenuInfo) => {
   const hide = message.loading('正在更新');
   try {
-    await updateUser({ ...fields });
+    await updateMenu({ ...fields });
     hide();
 
     message.success('更新成功');
@@ -51,36 +52,26 @@ export default () => {
     useState<boolean>(false);
   const [updateFormValues, setUpdateFormValues] = useState({});
   const access = useAccess();
-  const columns: ProColumns<User.UserInfo>[] = [
+  const columns: ProColumns<Menu.MenuInfo>[] = [
     {
-      title: 'id',
-      dataIndex: 'id',
-      sorter: true,
-      ellipsis: true,
-    },
-    {
-      title: '用户名',
-      dataIndex: 'username',
-      ellipsis: true,
-    },
-    {
-      title: '昵称',
+      title: '名称',
       dataIndex: 'name',
+      search: false,
       ellipsis: true,
     },
     {
-      title: '电话',
-      dataIndex: 'tel',
+      title: '路径',
+      dataIndex: 'route',
+      search: false,
       ellipsis: true,
     },
     {
       disable: true,
       title: '状态',
-      dataIndex: 'user_status',
-      filters: true,
-      onFilter: true,
+      dataIndex: 'menu_status',
       ellipsis: true,
       valueType: 'select',
+      search: false,
       valueEnum: {
         0: {
           text: '禁用',
@@ -96,22 +87,7 @@ export default () => {
       title: '创建时间',
       dataIndex: 'created_at',
       valueType: 'date',
-      sorter: true,
       hideInSearch: true,
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'created_at',
-      valueType: 'dateRange',
-      hideInTable: true,
-      search: {
-        transform: (value) => {
-          return {
-            start_time: value[0],
-            end_time: value[1],
-          };
-        },
-      },
     },
     {
       title: '操作',
@@ -119,12 +95,11 @@ export default () => {
       key: 'option',
       render: (_, record) => (
         <>
-          <Access accessible={access.UserUpdate}>
+          <Access accessible={access.MenuUpdate}>
             <a
               onClick={() => {
                 setUpdateFormValues(record);
                 handleUpdateModalVisible(true);
-                console.log(record);
               }}
             >
               编辑
@@ -134,48 +109,41 @@ export default () => {
       ),
     },
   ];
-  // @ts-ignore
+
   return (
     <PageContainer
       header={{
-        title: '用户管理',
+        title: '菜单管理',
       }}
     >
-      <ProTable<User.UserInfo>
+      <ProTable<Menu.MenuInfo>
         columns={columns}
         actionRef={actionRef}
         cardBordered
-        request={async (params = {}, sort, filter) => {
-          const { data } = await queryUserList({
-            ...params,
-            // @ts-ignore
-            filter,
-          });
+        request={async () => {
+          const { data } = await queryMenuList();
           const success = !!data;
           return {
-            data: data?.list || [],
+            data: data || [],
             success,
           };
         }}
         rowKey="id"
-        search={{
-          labelWidth: 'auto',
-          collapsed: false,
-        }}
+        search={false}
         options={{
           setting: {
             listsHeight: 400,
           },
         }}
-        pagination={{
-          showSizeChanger: true,
-          showQuickJumper: true,
+        pagination={false}
+        expandable={{
+          defaultExpandAllRows: true,
         }}
         dateFormatter="string"
-        headerTitle="用户列表"
+        headerTitle="菜单列表"
         toolBarRender={() => [
           // eslint-disable-next-line react/jsx-key
-          <Access accessible={access.UserAdd}>
+          <Access accessible={access.MenuAdd}>
             <Button
               key="button"
               onClick={() => {

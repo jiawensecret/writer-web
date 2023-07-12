@@ -2,18 +2,17 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable, PageContainer } from '@ant-design/pro-components';
 import { Button, message } from 'antd';
 import React, { useRef, useState } from 'react';
-import services from '@/services/user';
+import services from '@/services/route';
 import { Access, useAccess } from '@umijs/max';
-import UpdateForm from '@/pages/users/components/UpdateForm';
-import CreateForm from '@/pages/users/components/CreateForm';
-import { updateUser, addUser } from '@/services/user/UserController';
+import UpdateForm from '@/pages/routes/components/UpdateForm';
+import CreateForm from '@/pages/routes/components/CreateForm';
 
-const { queryUserList } = services.UserController;
+const { queryRouteList, updateRoute, addRoute } = services.RouteController;
 
 const handleAdd = async (fields: User.UserInfo) => {
   const hide = message.loading('正在添加');
   try {
-    await addUser({ ...fields });
+    await addRoute({ ...fields });
     hide();
     message.success('添加成功');
     return true;
@@ -31,7 +30,7 @@ const handleAdd = async (fields: User.UserInfo) => {
 const handleUpdate = async (fields: User.UserInfo) => {
   const hide = message.loading('正在更新');
   try {
-    await updateUser({ ...fields });
+    await updateRoute({ ...fields });
     hide();
 
     message.success('更新成功');
@@ -51,7 +50,7 @@ export default () => {
     useState<boolean>(false);
   const [updateFormValues, setUpdateFormValues] = useState({});
   const access = useAccess();
-  const columns: ProColumns<User.UserInfo>[] = [
+  const columns: ProColumns<Route.RouteInfo>[] = [
     {
       title: 'id',
       dataIndex: 'id',
@@ -59,38 +58,37 @@ export default () => {
       ellipsis: true,
     },
     {
-      title: '用户名',
-      dataIndex: 'username',
-      ellipsis: true,
-    },
-    {
-      title: '昵称',
+      title: '名称',
       dataIndex: 'name',
       ellipsis: true,
     },
     {
-      title: '电话',
-      dataIndex: 'tel',
-      ellipsis: true,
-    },
-    {
-      disable: true,
-      title: '状态',
-      dataIndex: 'user_status',
-      filters: true,
-      onFilter: true,
+      title: '请求方式',
+      dataIndex: 'method',
       ellipsis: true,
       valueType: 'select',
       valueEnum: {
-        0: {
-          text: '禁用',
-          status: 'Error',
+        get: {
+          text: 'GET',
         },
-        1: {
-          text: '正常',
-          status: 'Success',
+        post: {
+          text: 'POST',
+        },
+        put: {
+          text: 'PUT',
+        },
+        delete: {
+          text: 'DELETE',
+        },
+        patch: {
+          text: 'PATCH',
         },
       },
+    },
+    {
+      title: '路径',
+      dataIndex: 'path',
+      ellipsis: true,
     },
     {
       title: '创建时间',
@@ -119,7 +117,7 @@ export default () => {
       key: 'option',
       render: (_, record) => (
         <>
-          <Access accessible={access.UserUpdate}>
+          <Access accessible={access.RouteUpdate}>
             <a
               onClick={() => {
                 setUpdateFormValues(record);
@@ -138,7 +136,7 @@ export default () => {
   return (
     <PageContainer
       header={{
-        title: '用户管理',
+        title: '路由管理',
       }}
     >
       <ProTable<User.UserInfo>
@@ -146,7 +144,7 @@ export default () => {
         actionRef={actionRef}
         cardBordered
         request={async (params = {}, sort, filter) => {
-          const { data } = await queryUserList({
+          const { data } = await queryRouteList({
             ...params,
             // @ts-ignore
             filter,
@@ -172,10 +170,10 @@ export default () => {
           showQuickJumper: true,
         }}
         dateFormatter="string"
-        headerTitle="用户列表"
+        headerTitle="路由列表"
         toolBarRender={() => [
           // eslint-disable-next-line react/jsx-key
-          <Access accessible={access.UserAdd}>
+          <Access accessible={access.RouteAdd}>
             <Button
               key="button"
               onClick={() => {
