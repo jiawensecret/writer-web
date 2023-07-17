@@ -1,7 +1,6 @@
-import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { ProTable, PageContainer } from '@ant-design/pro-components';
-import { Button, message } from 'antd';
-import React, { useRef, useState } from 'react';
+import { PageContainer } from '@ant-design/pro-components';
+import { Button, message, Table, Tag } from 'antd';
+import React, { useEffect, useState } from 'react';
 import { Access, useAccess } from '@umijs/max';
 import UpdateForm from '@/pages/menus/components/UpdateForm';
 import CreateForm from '@/pages/menus/components/CreateForm';
@@ -10,6 +9,8 @@ import {
   addMenu,
   queryMenuList,
 } from '@/services/menu/MenuController';
+import { ColumnsType } from 'antd/es/table';
+import moment from 'moment';
 
 const handleAdd = async (fields: Menu.MenuInfo) => {
   const hide = message.loading('正在添加');
@@ -34,64 +35,59 @@ const handleUpdate = async (fields: Menu.MenuInfo) => {
   try {
     await updateMenu({ ...fields });
     hide();
-
     message.success('更新成功');
     return true;
   } catch (error) {
     hide();
-    message.error('更新失败请重试！');
     return false;
   }
 };
 
 export default () => {
-  const actionRef = useRef<ActionType>();
-
   const [createModalVisible, handleModalVisible] = useState<boolean>(false);
   const [updateModalVisible, handleUpdateModalVisible] =
     useState<boolean>(false);
   const [updateFormValues, setUpdateFormValues] = useState({});
   const access = useAccess();
-  const columns: ProColumns<Menu.MenuInfo>[] = [
+  const [menus, setMenus] = useState<Array<Menu.MenuInfo>>([]);
+  const fetchMenus = async () => {
+    const { data } = await queryMenuList();
+    setMenus(data);
+  };
+
+  useEffect(() => {
+    fetchMenus().then();
+  }, []);
+
+  const columns: ColumnsType<Menu.MenuInfo> = [
     {
       title: '名称',
       dataIndex: 'name',
-      search: false,
-      ellipsis: true,
+      key: 'name',
     },
     {
       title: '路径',
       dataIndex: 'route',
-      search: false,
       ellipsis: true,
     },
     {
-      disable: true,
       title: '状态',
       dataIndex: 'menu_status',
-      ellipsis: true,
-      valueType: 'select',
-      search: false,
-      valueEnum: {
-        0: {
-          text: '禁用',
-          status: 'Error',
-        },
-        1: {
-          text: '正常',
-          status: 'Success',
-        },
-      },
+      render: (text) => (
+        <>
+          <Tag color={text === 1 ? 'green-inverse' : 'volcano-inverse'}>
+            {text === 1 ? '开启' : '禁用'}
+          </Tag>
+        </>
+      ),
     },
     {
       title: '创建时间',
       dataIndex: 'created_at',
-      valueType: 'date',
-      hideInSearch: true,
+      render: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       title: '操作',
-      valueType: 'option',
       key: 'option',
       render: (_, record) => (
         <>
@@ -109,41 +105,12 @@ export default () => {
       ),
     },
   ];
-
   return (
     <PageContainer
       header={{
         title: '菜单管理',
-      }}
-    >
-      <ProTable<Menu.MenuInfo>
-        columns={columns}
-        actionRef={actionRef}
-        cardBordered
-        request={async () => {
-          const { data } = await queryMenuList();
-          const success = !!data;
-          return {
-            data: data || [],
-            success,
-          };
-        }}
-        rowKey="id"
-        search={false}
-        options={{
-          setting: {
-            listsHeight: 400,
-          },
-        }}
-        pagination={false}
-        expandable={{
-          defaultExpandAllRows: true,
-        }}
-        dateFormatter="string"
-        headerTitle="菜单列表"
-        toolBarRender={() => [
-          // eslint-disable-next-line react/jsx-key
-          <Access accessible={access.MenuAdd}>
+        extra: [
+          <Access accessible={access.MenuAdd} key={'add'}>
             <Button
               key="button"
               onClick={() => {
@@ -154,21 +121,32 @@ export default () => {
               新建
             </Button>
           </Access>,
-        ]}
-      />
-      <CreateForm
-        onCancel={() => handleModalVisible(false)}
-        onSubmit={async (value) => {
-          const success = await handleAdd(value);
-          if (success) {
-            handleModalVisible(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
-          }
+        ],
+      }}
+    >
+      <Table<Menu.MenuInfo>
+        columns={columns}
+        dataSource={menus}
+        rowKey="id"
+        pagination={false}
+        expandable={{
+          defaultExpandAllRows: true,
         }}
-        createModalVisible={createModalVisible}
-      ></CreateForm>
+      />
+      {menus && menus.length ? (
+        <CreateForm
+          onCancel={() => handleModalVisible(false)}
+          onSubmit={async (value) => {
+            const success = await handleAdd(value);
+            if (success) {
+              handleModalVisible(false);
+              fetchMenus().then();
+            }
+          }}
+          createModalVisible={createModalVisible}
+          menus={menus}
+        ></CreateForm>
+      ) : null}
       {updateFormValues && Object.keys(updateFormValues).length ? (
         <UpdateForm
           onSubmit={async (value) => {
@@ -176,9 +154,7 @@ export default () => {
             if (success) {
               handleUpdateModalVisible(false);
               setUpdateFormValues({});
-              if (actionRef.current) {
-                actionRef.current.reload();
-              }
+              fetchMenus().then();
             }
           }}
           onCancel={() => {
@@ -187,6 +163,7 @@ export default () => {
           }}
           updateModalVisible={updateModalVisible}
           values={updateFormValues}
+          menus={menus}
         />
       ) : null}
     </PageContainer>

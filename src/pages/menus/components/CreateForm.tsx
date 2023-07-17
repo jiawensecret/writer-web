@@ -1,12 +1,22 @@
 import React, { useState } from 'react';
 import { Form, Button, Input, Modal, Radio, TreeSelect } from 'antd';
-import { useRequest } from 'ahooks';
-import { queryMenuList } from '@/services/menu/MenuController';
 
 interface CreateFormProps {
   onCancel: (flag?: boolean, formValues?: User.UserInfo) => void;
   onSubmit: (values: User.UserInfo) => void;
   createModalVisible: boolean;
+  menus: Array<Menu.MenuInfo>;
+}
+
+function addOriginFatherMenu(data: Array<Menu.MenuInfo>) {
+  const flag = !!data.find((obj) => obj.id === 0);
+  if (!flag) {
+    data.unshift({
+      name: '/',
+      id: 0,
+    });
+  }
+  return data;
 }
 
 const CreateForm: React.FC<CreateFormProps> = (props) => {
@@ -15,17 +25,8 @@ const CreateForm: React.FC<CreateFormProps> = (props) => {
   const [formValues] = useState<User.UserInfo>({});
 
   const { onSubmit: handleCreate, onCancel: handleCreateModalVisible } = props;
-  const { data: menus } = useRequest(async () => {
-    const res = await queryMenuList();
-    if (res.data) {
-      res.data.unshift({
-        name: '/',
-        id: 0,
-      });
-      return res.data;
-    }
-    return [];
-  });
+  const [menus] = useState<Array<Menu.MenuInfo>>(props.menus);
+  const useMenus = addOriginFatherMenu(menus);
 
   const handleNext = async () => {
     const fieldsValue = await form.validateFields();
@@ -41,7 +42,7 @@ const CreateForm: React.FC<CreateFormProps> = (props) => {
           <TreeSelect
             style={{ width: '100%' }}
             dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-            treeData={menus}
+            treeData={useMenus}
             placeholder="请选择父级菜单"
             treeDefaultExpandAll
             fieldNames={{

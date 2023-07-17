@@ -1,13 +1,12 @@
 import { Button, Form, Input, Modal, Radio, TreeSelect } from 'antd';
 import React, { useState } from 'react';
-import { useRequest } from 'ahooks';
-import { queryMenuList } from '@/services/menu/MenuController';
 
 export interface UpdateFormProps {
   onCancel: (flag?: boolean, formValues?: Menu.MenuInfo) => void;
   onSubmit: (values: Menu.MenuInfo) => Promise<void>;
   updateModalVisible: boolean;
   values: Menu.MenuInfo;
+  menus: Array<Menu.MenuInfo>;
 }
 
 // @ts-ignore
@@ -16,6 +15,7 @@ function filterMenuTreeData(
   value: any,
 ) {
   if (data) {
+    // @ts-ignore
     return data
       .filter((node) => node.id !== value)
       .map((node) => {
@@ -32,6 +32,17 @@ function filterMenuTreeData(
   return data;
 }
 
+function addOriginFatherMenu(data: Array<Menu.MenuInfo>) {
+  const flag = !!data.find((obj) => obj.id === 0);
+  if (!flag) {
+    data.unshift({
+      name: '/',
+      id: 0,
+    });
+  }
+  return data;
+}
+
 const UpdateForm: React.FC<UpdateFormProps> = (props) => {
   const [formValues, setFormValues] = useState<Menu.MenuInfo>({
     id: props.values.id,
@@ -41,39 +52,27 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
     route: props.values.route,
     parent_id: props.values.parent_id,
   });
+  const [menus] = useState<Array<Menu.MenuInfo>>(props.menus);
   const [form] = Form.useForm();
   const { updateModalVisible, onCancel } = props;
   const { onSubmit: handleUpdate, onCancel: handleUpdateModalVisible } = props;
   const handleNext = async () => {
     const fieldsValue = await form.validateFields();
-
     setFormValues({ ...formValues, ...fieldsValue });
     await handleUpdate({ ...formValues, ...fieldsValue });
   };
 
-  const { data: menus } = useRequest(async () => {
-    const res = await queryMenuList();
-    if (res.data) {
-      res.data.unshift({
-        name: '/',
-        id: 0,
-      });
-      return res.data;
-    }
-    return [];
-  });
-
   const updateMenus = filterMenuTreeData(menus, formValues.id);
+  const useMenus = addOriginFatherMenu(updateMenus);
 
   const renderContent = () => {
     return (
       <>
-        <Form.Item name="parend_id" label="父级菜单">
+        <Form.Item name="parent_id" label="父级菜单">
           <TreeSelect
             style={{ width: '100%' }}
             dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-            defaultValue={formValues.parent_id}
-            treeData={updateMenus}
+            treeData={useMenus}
             placeholder="请选择父级菜单"
             treeDefaultExpandAll
             fieldNames={{
@@ -99,7 +98,6 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
         <Form.Item
           name="menu_status"
           label="状态"
-          initialValue={1}
           rules={[{ required: true, message: '请选择状态！' }]}
         >
           <Radio.Group>
