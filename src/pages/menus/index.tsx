@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-components';
-import { Button, message, Table, Tag } from 'antd';
+import { Button, Divider, message, Table, Tag } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { Access, useAccess } from '@umijs/max';
 import UpdateForm from '@/pages/menus/components/UpdateForm';
@@ -99,6 +99,18 @@ export default () => {
               }}
             >
               编辑
+            </a>
+          </Access>
+          <Divider type="vertical" />
+          <Access accessible={access.PermissionList}>
+            <a
+              onClick={() => {
+                window.location.replace(
+                  `/menus/permission?menu_id=${record.id}`,
+                );
+              }}
+            >
+              权限配置
             </a>
           </Access>
         </>
