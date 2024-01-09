@@ -22,7 +22,7 @@ export default (initialState: Common.Me) => {
   const UserPermission = !!(
     initialState &&
     initialState.permission &&
-    initialState.permission.includes('user:permission')
+    initialState.permission.includes('user:permissions')
   );
   const UserMenu = !!(
     initialState &&
@@ -32,17 +32,17 @@ export default (initialState: Common.Me) => {
   const UserCreatePermission = !!(
     initialState &&
     initialState.permission &&
-    initialState.permission.includes('user:create-permission')
+    initialState.permission.includes('user:create-permissions')
   );
   const UserModifyPermission = !!(
     initialState &&
     initialState.permission &&
-    initialState.permission.includes('user:modify-permission')
+    initialState.permission.includes('user:modify-permissions')
   );
   const UserDataPermission = !!(
     initialState &&
     initialState.permission &&
-    initialState.permission.includes('user:data-permission')
+    initialState.permission.includes('user:data-permissions')
   );
   const UserCopyUser = !!(
     initialState &&
@@ -79,32 +79,32 @@ export default (initialState: Common.Me) => {
   const PermissionList = !!(
     initialState &&
     initialState.permission &&
-    initialState.permission.includes('permission:list')
+    initialState.permission.includes('permissions:list')
   );
   const PermissionTree = !!(
     initialState &&
     initialState.permission &&
-    initialState.permission.includes('permission:tree')
+    initialState.permission.includes('permissions:tree')
   );
   const PermissionAdd = !!(
     initialState &&
     initialState.permission &&
-    initialState.permission.includes('permission:add')
+    initialState.permission.includes('permissions:add')
   );
   const PermissionUpdate = !!(
     initialState &&
     initialState.permission &&
-    initialState.permission.includes('permission:update')
+    initialState.permission.includes('permissions:update')
   );
   const PermissionDelete = !!(
     initialState &&
     initialState.permission &&
-    initialState.permission.includes('permission:delete')
+    initialState.permission.includes('permissions:delete')
   );
   const PermissionAddRoute = !!(
     initialState &&
     initialState.permission &&
-    initialState.permission.includes('permission:add-route')
+    initialState.permission.includes('permissions:add-route')
   );
   const RouteList = !!(
     initialState &&

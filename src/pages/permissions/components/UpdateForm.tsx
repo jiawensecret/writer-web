@@ -1,4 +1,4 @@
-import { Button, Form, Input, Modal } from 'antd';
+import { Button, Form, Input, Modal, TreeSelect } from 'antd';
 import React, { useState } from 'react';
 
 export interface UpdateFormProps {
@@ -6,7 +6,7 @@ export interface UpdateFormProps {
   onSubmit: (values: Permission.PermissionInfo) => Promise<void>;
   updateModalVisible: boolean;
   values: Permission.PermissionInfo;
-  menuId: number;
+  menus: Array<Menu.MenuInfo>;
 }
 
 const UpdateForm: React.FC<UpdateFormProps> = (props) => {
@@ -15,7 +15,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
     name: props.values.name,
     code: props.values.code,
     description: props.values.description,
-    menu_id: props.menuId,
+    menu_id: props.values.menu_id,
   });
   const [form] = Form.useForm();
   const { updateModalVisible, onCancel } = props;
@@ -26,10 +26,24 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
     setFormValues({ ...formValues, ...fieldsValue });
     await handleUpdate({ ...formValues, ...fieldsValue });
   };
+  const [menus] = useState<Array<Menu.MenuInfo>>(props.menus);
 
   const renderContent = () => {
     return (
       <>
+        <Form.Item name="menu_id" label="菜单">
+          <TreeSelect
+            style={{ width: '100%' }}
+            dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+            treeData={menus}
+            placeholder="请选择菜单"
+            treeDefaultExpandAll
+            fieldNames={{
+              label: 'name',
+              value: 'id',
+            }}
+          />
+        </Form.Item>
         <Form.Item
           name="name"
           label="名称"
@@ -79,6 +93,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
           name: formValues.name,
           code: formValues.code,
           description: formValues.description,
+          menu_id: formValues.menu_id,
         }}
       >
         {renderContent()}

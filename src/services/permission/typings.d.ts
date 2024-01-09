@@ -7,6 +7,11 @@ declare namespace Permission {
     msg: string;
   }
 
+  interface PermissionInfoApi {
+    data: PermissionInfo;
+    msg: string;
+  }
+
   interface PermissionInfo {
     id?: number;
     name?: string;
@@ -15,5 +20,10 @@ declare namespace Permission {
     description?: string;
     routes?: Array<Route.RouteInfo> | null;
     created_at?: string;
+  }
+
+  interface PermissionRoute {
+    id: number;
+    route_ids: string[];
   }
 }

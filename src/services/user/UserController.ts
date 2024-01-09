@@ -33,3 +33,18 @@ export async function updateUser(params: User.UserInfo) {
     },
   });
 }
+
+export async function getUserPermission(userId: number) {
+  return request<User.UserPermissionApi>(`/api/user/${userId}/permissions`, {
+    method: 'GET',
+  });
+}
+
+export async function updateUserPermission(params: User.UserPermissionForm) {
+  return request<Common.Result>(`/api/user/${params.id}/permission`, {
+    method: 'PUT',
+    data: {
+      ...params,
+    },
+  });
+}

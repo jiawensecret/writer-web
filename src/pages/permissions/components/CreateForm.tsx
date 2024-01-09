@@ -1,20 +1,18 @@
 import React, { useState } from 'react';
-import { Form, Button, Input, Modal } from 'antd';
+import { Form, Button, Input, Modal, TreeSelect } from 'antd';
 
 interface CreateFormProps {
   onCancel: (flag?: boolean, formValues?: Permission.PermissionInfo) => void;
   onSubmit: (values: Permission.PermissionInfo) => void;
   createModalVisible: boolean;
-  menuId: number;
+  menus: Array<Menu.MenuInfo>;
 }
 
 const CreateForm: React.FC<CreateFormProps> = (props) => {
   const { createModalVisible, onCancel } = props;
   const [form] = Form.useForm();
-  const [formValues] = useState<Permission.PermissionInfo>({
-    menu_id: props.menuId,
-  });
-
+  const [formValues] = useState<Permission.PermissionInfo>({});
+  const [menus] = useState<Array<Menu.MenuInfo>>(props.menus);
   const { onSubmit: handleCreate, onCancel: handleCreateModalVisible } = props;
 
   const handleNext = async () => {
@@ -27,6 +25,19 @@ const CreateForm: React.FC<CreateFormProps> = (props) => {
   const renderContent = () => {
     return (
       <>
+        <Form.Item name="parend_id" label="菜单">
+          <TreeSelect
+            style={{ width: '100%' }}
+            dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+            treeData={menus}
+            placeholder="请选择菜单"
+            treeDefaultExpandAll
+            fieldNames={{
+              label: 'name',
+              value: 'id',
+            }}
+          />
+        </Form.Item>
         <Form.Item
           name="name"
           label="名称"

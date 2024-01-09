@@ -15,6 +15,12 @@ export async function queryRouteList(params: {
   });
 }
 
+export async function getRoutes() {
+  return request<Route.RouteListApi>('/api/all-routes', {
+    method: 'GET',
+  });
+}
+
 export async function addRoute(params: Route.RouteInfo) {
   return request<Common.Result>('/api/route', {
     method: 'POST',

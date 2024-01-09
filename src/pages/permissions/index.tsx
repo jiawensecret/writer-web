@@ -1,15 +1,18 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable, PageContainer } from '@ant-design/pro-components';
-import { Button, message } from 'antd';
-import React, { useRef, useState } from 'react';
+import { Button, Divider, message } from 'antd';
+import React, { useEffect, useRef, useState } from 'react';
 import { Access, useAccess } from '@umijs/max';
-import UpdateForm from '@/pages/menus/permission/components/UpdateForm';
-import CreateForm from '@/pages//menus/permission/components/CreateForm';
+import UpdateForm from '@/pages/permissions/components/UpdateForm';
+import CreateForm from '@/pages/permissions/components/CreateForm';
 import {
   updatePermission,
   addPermission,
+  changePermissionRoutes,
 } from '@/services/permission/PermissionController';
-import { getMenuPermission } from '@/services/permission/PermissionController';
+import { getPermissions } from '@/services/permission/PermissionController';
+import RouteForm from '@/pages/permissions/components/Route';
+import { queryMenuList } from '@/services/menu/MenuController';
 
 const handleAdd = async (fields: Permission.PermissionInfo) => {
   const hide = message.loading('正在添加');
@@ -44,6 +47,21 @@ const handleUpdate = async (fields: Permission.PermissionInfo) => {
   }
 };
 
+const handlePermissionRoute = async (fields: Permission.PermissionRoute) => {
+  const hide = message.loading('正在修改');
+  try {
+    await changePermissionRoutes({ ...fields });
+    hide();
+
+    message.success('成功');
+    return true;
+  } catch (error) {
+    hide();
+    message.error('修改失败请重试！');
+    return false;
+  }
+};
+
 export default () => {
   const actionRef = useRef<ActionType>();
   const urlObj = new URL(window.location.href);
@@ -53,7 +71,18 @@ export default () => {
   const [updateModalVisible, handleUpdateModalVisible] =
     useState<boolean>(false);
   const [updateFormValues, setUpdateFormValues] = useState({});
+  const [routeFormValues, setRouteFormValues] = useState({});
+  const [routeModalVisible, handleRouteModalVisible] = useState<boolean>(false);
   const access = useAccess();
+  const [menus, setMenus] = useState<Array<Menu.MenuInfo>>([]);
+  const fetchMenus = async () => {
+    const { data } = await queryMenuList();
+    setMenus(data);
+  };
+
+  useEffect(() => {
+    fetchMenus().then();
+  }, []);
   const columns: ProColumns<Permission.PermissionInfo>[] = [
     {
       title: 'id',
@@ -100,6 +129,17 @@ export default () => {
               编辑
             </a>
           </Access>
+          <Divider type="vertical" />
+          {/*<Access accessible={access.PermissionAddRoute}>*/}
+          <a
+            onClick={() => {
+              setRouteFormValues(record);
+              handleRouteModalVisible(true);
+            }}
+          >
+            路由配置
+          </a>
+          {/*</Access>*/}
         </>
       ),
     },
@@ -116,7 +156,7 @@ export default () => {
         actionRef={actionRef}
         cardBordered
         request={async (params = {}, sort, filter) => {
-          const { data } = await getMenuPermission(menuId, {
+          const { data } = await getPermissions(menuId, {
             ...params,
             // @ts-ignore
             filter,
@@ -167,7 +207,7 @@ export default () => {
           }
         }}
         createModalVisible={createModalVisible}
-        menuId={menuId}
+        menus={menus}
       ></CreateForm>
       {updateFormValues && Object.keys(updateFormValues).length ? (
         <UpdateForm
@@ -187,9 +227,30 @@ export default () => {
           }}
           updateModalVisible={updateModalVisible}
           values={updateFormValues}
-          menuId={menuId}
+          menus={menus}
         />
       ) : null}
+      {routeFormValues && Object.keys(routeFormValues).length ? (
+        <RouteForm
+          onSubmit={async (value) => {
+            const success = await handlePermissionRoute(value);
+            if (success) {
+              handleRouteModalVisible(false);
+              setRouteFormValues({});
+              if (actionRef.current) {
+                actionRef.current.reload();
+              }
+            }
+          }}
+          onCancel={() => {
+            handleRouteModalVisible(false);
+            setRouteFormValues({});
+          }}
+          drawerVisit={routeModalVisible}
+          values={routeFormValues}
+        />
+      ) : null}
+      )
     </PageContainer>
   );
 };

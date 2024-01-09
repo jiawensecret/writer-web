@@ -1,12 +1,17 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable, PageContainer } from '@ant-design/pro-components';
-import { Button, message } from 'antd';
+import { Button, Divider, message } from 'antd';
 import React, { useRef, useState } from 'react';
 import services from '@/services/user';
 import { Access, useAccess } from '@umijs/max';
 import UpdateForm from '@/pages/users/components/UpdateForm';
 import CreateForm from '@/pages/users/components/CreateForm';
-import { updateUser, addUser } from '@/services/user/UserController';
+import {
+  updateUser,
+  addUser,
+  updateUserPermission,
+} from '@/services/user/UserController';
+import UserPermission from '@/pages/users/components/UserPermission';
 
 const { queryUserList } = services.UserController;
 
@@ -43,6 +48,21 @@ const handleUpdate = async (fields: User.UserInfo) => {
   }
 };
 
+const handlePermissionUpdate = async (fields: User.UserPermissionForm) => {
+  const hide = message.loading('正在更新');
+  try {
+    await updateUserPermission({ ...fields });
+    hide();
+
+    message.success('更新成功');
+    return true;
+  } catch (error) {
+    hide();
+    message.error('更新失败请重试！');
+    return false;
+  }
+};
+
 export default () => {
   const actionRef = useRef<ActionType>();
 
@@ -50,6 +70,9 @@ export default () => {
   const [updateModalVisible, handleUpdateModalVisible] =
     useState<boolean>(false);
   const [updateFormValues, setUpdateFormValues] = useState({});
+  const [permissionFormValues, setPermissionFormValues] = useState({});
+  const [permissionModalVisible, handlePermissionModalVisible] =
+    useState<boolean>(false);
   const access = useAccess();
   const columns: ProColumns<User.UserInfo>[] = [
     {
@@ -130,6 +153,18 @@ export default () => {
               编辑
             </a>
           </Access>
+          <Divider type="vertical" />
+          {/*<Access accessible={access.UserPermission}>*/}
+          <a
+            onClick={() => {
+              setPermissionFormValues(record);
+              handlePermissionModalVisible(true);
+              console.log(record);
+            }}
+          >
+            权限
+          </a>
+          {/*</Access>*/}
         </>
       ),
     },
@@ -219,6 +254,26 @@ export default () => {
           }}
           updateModalVisible={updateModalVisible}
           values={updateFormValues}
+        />
+      ) : null}
+      {permissionFormValues && Object.keys(permissionFormValues).length ? (
+        <UserPermission
+          onSubmit={async (value) => {
+            const success = await handlePermissionUpdate(value);
+            if (success) {
+              handlePermissionModalVisible(false);
+              setPermissionFormValues({});
+              if (actionRef.current) {
+                actionRef.current.reload();
+              }
+            }
+          }}
+          onCancel={() => {
+            handlePermissionModalVisible(false);
+            setPermissionFormValues({});
+          }}
+          drawerVisit={permissionModalVisible}
+          values={permissionFormValues}
         />
       ) : null}
     </PageContainer>
