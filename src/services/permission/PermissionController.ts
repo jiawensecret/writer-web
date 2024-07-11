@@ -49,6 +49,12 @@ export async function updatePermission(params: Permission.PermissionInfo) {
   });
 }
 
+export async function deletePermission(params: Permission.PermissionInfo) {
+  return request<Common.Result>(`/api/permission/${params.id}`, {
+    method: 'DELETE',
+  });
+}
+
 export async function getPermissionInfo(permissionId: number) {
   return request<Permission.PermissionInfoApi>(
     `/api/permission/${permissionId}`,

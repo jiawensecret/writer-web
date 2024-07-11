@@ -22,7 +22,7 @@ const UserPermission: React.FC<UserPermissionFormProps> = (props) => {
   const { onSubmit: handleUpdate, onCancel: handleDrawerVisit } = props;
   const handleNext = async () => {
     await handleUpdate({
-      permissions: checkedList,
+      permission_ids: checkedList,
       id: props.values.id ?? 0,
     });
   };
@@ -31,10 +31,36 @@ const UserPermission: React.FC<UserPermissionFormProps> = (props) => {
     [],
   );
 
+  const getInitCheckPermissions = (permission: User.UserPermission) => {
+    let checkPermissions: number[] = [];
+    if (permission.permissions && permission.permissions.length > 0) {
+      for (const p of permission.permissions) {
+        if (p.checked) checkPermissions.push(p.id ?? 0);
+      }
+    }
+    if (permission.children && permission.children.length > 0) {
+      for (const child of permission.children) {
+        checkPermissions = checkPermissions.concat(
+          getInitCheckPermissions(child),
+        );
+      }
+    }
+    return checkPermissions;
+  };
+
   const fetchUserPermission = async () => {
     if (props.values.id) {
       const { data } = await getUserPermission(props.values.id);
-      if (data) setPermissions(data);
+      if (data) {
+        setPermissions(data);
+        let checkPermissions: number[] = [];
+        for (const permission of data) {
+          checkPermissions = checkPermissions.concat(
+            getInitCheckPermissions(permission),
+          );
+        }
+        setCheckedList(checkPermissions);
+      }
     }
   };
 
@@ -214,7 +240,7 @@ const UserPermission: React.FC<UserPermissionFormProps> = (props) => {
         <div style={{ textAlign: 'left' }}>
           <Button
             style={{ marginLeft: '8px' }}
-            onClick={() => handleDrawerVisit(false, formValues)}
+            onClick={() => handleDrawerVisit(false)}
           >
             取消
           </Button>

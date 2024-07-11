@@ -9,6 +9,7 @@ import {
   updatePermission,
   addPermission,
   changePermissionRoutes,
+  deletePermission,
 } from '@/services/permission/PermissionController';
 import { getPermissions } from '@/services/permission/PermissionController';
 import RouteForm from '@/pages/permissions/components/Route';
@@ -58,6 +59,20 @@ const handlePermissionRoute = async (fields: Permission.PermissionRoute) => {
   } catch (error) {
     hide();
     message.error('修改失败请重试！');
+    return false;
+  }
+};
+
+const handleRemove = async (fields: Permission.PermissionInfo) => {
+  const hide = message.loading('正在删除');
+  try {
+    await deletePermission({ ...fields });
+    hide();
+    message.success('成功');
+    return true;
+  } catch (error) {
+    hide();
+    message.error('删除失败请重试！');
     return false;
   }
 };
@@ -130,16 +145,29 @@ export default () => {
             </a>
           </Access>
           <Divider type="vertical" />
-          {/*<Access accessible={access.PermissionAddRoute}>*/}
-          <a
-            onClick={() => {
-              setRouteFormValues(record);
-              handleRouteModalVisible(true);
-            }}
-          >
-            路由配置
-          </a>
-          {/*</Access>*/}
+          <Access accessible={access.PermissionAddRoute}>
+            <a
+              onClick={() => {
+                setRouteFormValues(record);
+                handleRouteModalVisible(true);
+              }}
+            >
+              路由配置
+            </a>
+          </Access>
+          <Divider type="vertical" />
+          <Access accessible={access.PermissionDelete}>
+            <a
+              onClick={async () => {
+                const success = await handleRemove(record);
+                if (success && actionRef.current) {
+                  await actionRef.current.reload();
+                }
+              }}
+            >
+              删除
+            </a>
+          </Access>
         </>
       ),
     },
@@ -177,7 +205,10 @@ export default () => {
             listsHeight: 400,
           },
         }}
-        pagination={false}
+        pagination={{
+          showSizeChanger: true,
+          showQuickJumper: true,
+        }}
         dateFormatter="string"
         headerTitle="权限列表"
         toolBarRender={() => [
@@ -195,20 +226,22 @@ export default () => {
           </Access>,
         ]}
       />
-      <CreateForm
-        onCancel={() => handleModalVisible(false)}
-        onSubmit={async (value) => {
-          const success = await handleAdd(value);
-          if (success) {
-            handleModalVisible(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
+      {menus && Object.keys(menus).length ? (
+        <CreateForm
+          onCancel={() => handleModalVisible(false)}
+          onSubmit={async (value) => {
+            const success = await handleAdd(value);
+            if (success) {
+              handleModalVisible(false);
+              if (actionRef.current) {
+                await actionRef.current.reload();
+              }
             }
-          }
-        }}
-        createModalVisible={createModalVisible}
-        menus={menus}
-      ></CreateForm>
+          }}
+          createModalVisible={createModalVisible}
+          menus={menus}
+        ></CreateForm>
+      ) : null}
       {updateFormValues && Object.keys(updateFormValues).length ? (
         <UpdateForm
           onSubmit={async (value) => {
@@ -217,7 +250,7 @@ export default () => {
               handleUpdateModalVisible(false);
               setUpdateFormValues({});
               if (actionRef.current) {
-                actionRef.current.reload();
+                await actionRef.current.reload();
               }
             }
           }}
@@ -238,7 +271,7 @@ export default () => {
               handleRouteModalVisible(false);
               setRouteFormValues({});
               if (actionRef.current) {
-                actionRef.current.reload();
+                await actionRef.current.reload();
               }
             }
           }}

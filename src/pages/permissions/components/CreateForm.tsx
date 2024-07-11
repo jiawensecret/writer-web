@@ -25,7 +25,7 @@ const CreateForm: React.FC<CreateFormProps> = (props) => {
   const renderContent = () => {
     return (
       <>
-        <Form.Item name="parend_id" label="菜单">
+        <Form.Item name="menu_id" label="菜单">
           <TreeSelect
             style={{ width: '100%' }}
             dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}

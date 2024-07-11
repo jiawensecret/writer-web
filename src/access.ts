@@ -79,32 +79,32 @@ export default (initialState: Common.Me) => {
   const PermissionList = !!(
     initialState &&
     initialState.permission &&
-    initialState.permission.includes('permissions:list')
+    initialState.permission.includes('permission:list')
   );
   const PermissionTree = !!(
     initialState &&
     initialState.permission &&
-    initialState.permission.includes('permissions:tree')
+    initialState.permission.includes('permission:tree')
   );
   const PermissionAdd = !!(
     initialState &&
     initialState.permission &&
-    initialState.permission.includes('permissions:add')
+    initialState.permission.includes('permission:add')
   );
   const PermissionUpdate = !!(
     initialState &&
     initialState.permission &&
-    initialState.permission.includes('permissions:update')
+    initialState.permission.includes('permission:update')
   );
   const PermissionDelete = !!(
     initialState &&
     initialState.permission &&
-    initialState.permission.includes('permissions:delete')
+    initialState.permission.includes('permission:delete')
   );
   const PermissionAddRoute = !!(
     initialState &&
     initialState.permission &&
-    initialState.permission.includes('permissions:add-route')
+    initialState.permission.includes('permission:add-route')
   );
   const RouteList = !!(
     initialState &&

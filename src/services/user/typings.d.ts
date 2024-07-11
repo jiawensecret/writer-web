@@ -24,7 +24,7 @@ declare namespace User {
 
   interface UserPermissionForm {
     id: number;
-    permissions: number[];
+    permission_ids: number[];
   }
 
   interface UserPermissionApi {

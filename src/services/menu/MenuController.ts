@@ -23,3 +23,9 @@ export async function updateMenu(params: Menu.MenuInfo) {
     },
   });
 }
+
+export async function deleteMenu(params: Menu.MenuInfo) {
+  return request<Common.Result>(`/api/menu/${params.id}`, {
+    method: 'DELETE',
+  });
+}

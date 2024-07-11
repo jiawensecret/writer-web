@@ -8,6 +8,7 @@ import {
   updateMenu,
   addMenu,
   queryMenuList,
+  deleteMenu,
 } from '@/services/menu/MenuController';
 import { ColumnsType } from 'antd/es/table';
 import moment from 'moment';
@@ -39,6 +40,20 @@ const handleUpdate = async (fields: Menu.MenuInfo) => {
     return true;
   } catch (error) {
     hide();
+    return false;
+  }
+};
+
+const handleRemove = async (fields: Menu.MenuInfo) => {
+  const hide = message.loading('正在删除');
+  try {
+    await deleteMenu({ ...fields });
+    hide();
+    message.success('成功');
+    return true;
+  } catch (error) {
+    hide();
+    message.error('删除失败请重试！');
     return false;
   }
 };
@@ -102,15 +117,16 @@ export default () => {
             </a>
           </Access>
           <Divider type="vertical" />
-          <Access accessible={access.PermissionList}>
+          <Access accessible={access.MenuDelete}>
             <a
-              onClick={() => {
-                window.location.replace(
-                  `/menus/permission?menu_id=${record.id}`,
-                );
+              onClick={async () => {
+                const success = await handleRemove(record);
+                if (success) {
+                  fetchMenus().then();
+                }
               }}
             >
-              权限配置
+              删除
             </a>
           </Access>
         </>
