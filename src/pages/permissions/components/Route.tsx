@@ -41,7 +41,7 @@ const RouteForm: React.FC<RouteFormProps> = (props) => {
         let a = {
           key: String(item.id),
           title: String(item.name ?? '') + '(' + String(item.path ?? '') + ')',
-          description: String(item.id),
+          description: String(item.method),
         };
         tempData.push(a);
       });
@@ -68,7 +68,7 @@ const RouteForm: React.FC<RouteFormProps> = (props) => {
   const renderItem = (item: AllRouteType) => {
     const customLabel = (
       <span className="custom-item">
-        {item.title} - {item.description}
+        {item.title}[{item.description}]
       </span>
     );
 

@@ -1,18 +1,22 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable, PageContainer } from '@ant-design/pro-components';
-import { Button, message } from 'antd';
+import { Button, Divider, message } from 'antd';
 import React, { useRef, useState } from 'react';
-import services from '@/services/route';
+import services from '@/services/mock-api';
 import { Access, useAccess } from '@umijs/max';
-import UpdateForm from '@/pages/routes/components/UpdateForm';
-import CreateForm from '@/pages/routes/components/CreateForm';
+import UpdateForm from '@/pages/mock-apis/components/UpdateForm';
+import CreateForm from '@/pages/mock-apis/components/CreateForm';
+import {
+  addMockApi,
+  updateMockApi,
+} from '@/services/mock-api/MockApiController';
 
-const { queryRouteList, updateRoute, addRoute } = services.RouteController;
+const { queryMockList } = services.MockApiController;
 
-const handleAdd = async (fields: User.UserInfo) => {
+const handleAdd = async (fields: MockApi.MockInfo) => {
   const hide = message.loading('正在添加');
   try {
-    await addRoute({ ...fields });
+    await addMockApi({ ...fields });
     hide();
     message.success('添加成功');
     return true;
@@ -27,10 +31,10 @@ const handleAdd = async (fields: User.UserInfo) => {
  * 更新节点
  * @param fields
  */
-const handleUpdate = async (fields: User.UserInfo) => {
+const handleUpdate = async (fields: MockApi.MockInfo) => {
   const hide = message.loading('正在更新');
   try {
-    await updateRoute({ ...fields });
+    await updateMockApi({ ...fields });
     hide();
 
     message.success('更新成功');
@@ -49,8 +53,9 @@ export default () => {
   const [updateModalVisible, handleUpdateModalVisible] =
     useState<boolean>(false);
   const [updateFormValues, setUpdateFormValues] = useState({});
+  useState<boolean>(false);
   const access = useAccess();
-  const columns: ProColumns<Route.RouteInfo>[] = [
+  const columns: ProColumns<MockApi.MockInfo>[] = [
     {
       title: 'id',
       dataIndex: 'id',
@@ -63,31 +68,8 @@ export default () => {
       ellipsis: true,
     },
     {
-      title: '请求方式',
-      dataIndex: 'method',
-      ellipsis: true,
-      valueType: 'select',
-      valueEnum: {
-        get: {
-          text: 'GET',
-        },
-        post: {
-          text: 'POST',
-        },
-        put: {
-          text: 'PUT',
-        },
-        delete: {
-          text: 'DELETE',
-        },
-        patch: {
-          text: 'PATCH',
-        },
-      },
-    },
-    {
-      title: '路径',
-      dataIndex: 'path',
+      title: '编码(路径)',
+      dataIndex: 'code',
       ellipsis: true,
     },
     {
@@ -98,26 +80,12 @@ export default () => {
       hideInSearch: true,
     },
     {
-      title: '创建时间',
-      dataIndex: 'created_at',
-      valueType: 'dateRange',
-      hideInTable: true,
-      search: {
-        transform: (value) => {
-          return {
-            start_time: value[0],
-            end_time: value[1],
-          };
-        },
-      },
-    },
-    {
       title: '操作',
       valueType: 'option',
       key: 'option',
       render: (_, record) => (
         <>
-          <Access accessible={access.RouteUpdate}>
+          <Access accessible={access.MockUpdate}>
             <a
               onClick={() => {
                 setUpdateFormValues(record);
@@ -128,6 +96,7 @@ export default () => {
               编辑
             </a>
           </Access>
+          <Divider type="vertical" />
         </>
       ),
     },
@@ -136,15 +105,15 @@ export default () => {
   return (
     <PageContainer
       header={{
-        title: '路由管理',
+        title: 'mocks管理',
       }}
     >
-      <ProTable<User.UserInfo>
+      <ProTable<MockApi.MockInfo>
         columns={columns}
         actionRef={actionRef}
         cardBordered
         request={async (params = {}, sort, filter) => {
-          const { data } = await queryRouteList({
+          const { data } = await queryMockList({
             ...params,
             // @ts-ignore
             filter,
@@ -170,10 +139,10 @@ export default () => {
           showQuickJumper: true,
         }}
         dateFormatter="string"
-        headerTitle="路由列表"
+        headerTitle="mock-api列表"
         toolBarRender={() => [
           // eslint-disable-next-line react/jsx-key
-          <Access accessible={access.RouteAdd}>
+          <Access accessible={access.MockAdd}>
             <Button
               key="button"
               onClick={() => {
@@ -193,7 +162,7 @@ export default () => {
           if (success) {
             handleModalVisible(false);
             if (actionRef.current) {
-              actionRef.current.reload();
+              await actionRef.current.reload();
             }
           }
         }}
@@ -207,7 +176,7 @@ export default () => {
               handleUpdateModalVisible(false);
               setUpdateFormValues({});
               if (actionRef.current) {
-                actionRef.current.reload();
+                await actionRef.current.reload();
               }
             }
           }}

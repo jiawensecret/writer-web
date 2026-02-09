@@ -53,7 +53,10 @@ const handleRemove = async (fields: Menu.MenuInfo) => {
     return true;
   } catch (error) {
     hide();
-    message.error('删除失败请重试！');
+    if (error) {
+      // @ts-ignore
+      message.error(error.response?.data.msg ?? '');
+    }
     return false;
   }
 };

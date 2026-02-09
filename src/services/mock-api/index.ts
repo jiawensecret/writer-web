@@ -1,7 +1,7 @@
 /* eslint-disable */
 // 该文件由 OneAPI 自动生成，请勿手动修改！
 
-import * as MenuController from './MenuController';
+import * as MockApiController from './MockApiController';
 export default {
-  MenuController,
+  MockApiController,
 };
